@@ -62,10 +62,10 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
 
       const shareUrl = `${window.location.origin}/?shareId=${shareId}`;
       await navigator.clipboard.writeText(shareUrl);
-      alert(`Link copiado para a área de transferência!\n\nEnvie este link para outros pais: ${shareUrl}`);
-    } catch (error) {
+      alert(`Link copiado! 📋\n\nEnvie para o WhatsApp dos outros pais.`);
+    } catch (error: any) {
       console.error(error);
-      alert("Erro ao gerar link de compartilhamento.");
+      alert(`Erro ao gerar link: ${error.message || error.code || 'Desconhecido'}`);
     } finally {
       setSharingId(null);
     }
@@ -83,7 +83,13 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 flex flex-col items-center text-center">
         <h2 className="text-xl font-bold text-gray-800 mb-2">Adicionar Nova Lista</h2>
-        <p className="text-sm text-gray-500 mb-6">A nossa IA vai identificar automaticamente os itens da sua lista.</p>
+        <p className="text-sm text-gray-500 mb-6">
+          A nossa IA vai identificar automaticamente os itens da sua lista.
+          <br />
+          <span className="text-xs text-pink-500 font-medium mt-1 block">
+            Dica: Você pode compartilhar suas listas clicando no ícone 🔗 abaixo.
+          </span>
+        </p>
 
         <div className="relative w-full max-w-sm">
           <input

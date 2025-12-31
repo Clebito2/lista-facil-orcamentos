@@ -14,6 +14,28 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
   const [searchTerm, setSearchTerm] = React.useState("");
 
   if (!analysis) {
+    if (consolidatedItems.length > 0) {
+      return (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+            <div className="text-5xl mb-4 text-pink-500">📊</div>
+            <h2 className="text-xl font-bold text-gray-800">Relatório de Preços</h2>
+            <p className="text-gray-500 max-w-md mx-auto mt-2 mb-6">
+              Adicione pelo menos um <strong>Orçamento</strong> para ver a mágica da comparação de preços.
+            </p>
+
+            <button
+              onClick={generatePDF}
+              className="text-sm font-bold text-white bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-xl shadow-lg shadow-pink-200 flex items-center gap-2 transition-all hover:scale-105"
+            >
+              📄 Baixar Checklist Simples (PDF)
+            </button>
+            <p className="text-xs text-gray-400 mt-2">Gera uma lista limpa para você levar às lojas.</p>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
         <div className="text-5xl mb-4 text-pink-500">📊</div>
@@ -45,8 +67,6 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
   };
 
   const generatePDF = () => {
-    if (!analysis) return;
-
     const doc = new jsPDF();
     const today = new Date().toLocaleDateString('pt-BR');
 
@@ -58,63 +78,92 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Gerado em: ${today}`, 14, 26);
-    doc.text(" leve esta lista para as lojas indicadas para garantir o menor preço.", 14, 30);
 
-    let yPos = 40;
+    if (!analysis) {
+      // SIMPLE MODE (No Quotes)
+      doc.text("Lista para cotação de preços.", 14, 30);
 
-    // Group items by supplier
-    const itemsBySupplier = (analysis.recommendations || []).reduce((acc: Record<string, typeof analysis.recommendations>, rec) => {
-      if (!acc[rec.bestSupplier]) acc[rec.bestSupplier] = [];
-      acc[rec.bestSupplier].push(rec);
-      return acc;
-    }, {});
-
-    Object.entries(itemsBySupplier).forEach(([supplier, items]) => {
-      const storeTotal = items.reduce((sum, item) => {
-        const master = consolidatedItems.find(m => m.name === item.itemName);
-        return sum + (item.price * (master?.totalQuantity || 0));
-      }, 0);
-
-      // Store Header
-      doc.setFontSize(14);
-      doc.setTextColor(0);
-      doc.text(`${supplier}`, 14, yPos);
-
-      doc.setFontSize(12);
-      doc.setTextColor(16, 185, 129); // Emerald-500
-      doc.text(`Total Est.: R$ ${storeTotal.toFixed(2)}`, 150, yPos);
-
-      yPos += 5;
-
-      // Table
-      const tableBody = items.map(item => {
-        const master = consolidatedItems.find(m => m.name === item.itemName);
-        return [
-          item.itemName,
-          `x${master?.totalQuantity || 1}`,
-          `R$ ${item.price.toFixed(2)}`,
-          '[   ]'
-        ];
-      });
+      const tableBody = consolidatedItems.map(item => [
+        item.name,
+        `x${item.totalQuantity}`,
+        '', // Store
+        '', // Price
+        '[   ]' // Check
+      ]);
 
       autoTable(doc, {
-        startY: yPos,
-        head: [['Item', 'Qtd', 'Preço Unit.', 'Check']],
+        startY: 40,
+        head: [['Item', 'Qtd', 'Loja (Nome)', 'Preço (R$)', 'Check']],
         body: tableBody,
         theme: 'striped',
-        headStyles: { fillColor: [236, 72, 153] }, // Pink headers
-        styles: { fontSize: 10 },
+        headStyles: { fillColor: [236, 72, 153] },
         columnStyles: {
-          0: { cellWidth: 90 }, // Item
-          1: { cellWidth: 20 }, // Qtd
-          2: { cellWidth: 30 }, // Price
-          3: { cellWidth: 20, halign: 'center' } // Checkbox
+          0: { cellWidth: 80 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 40 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 20, halign: 'center' }
         }
       });
+    } else {
+      // FULL MODE (With Recommendations)
+      doc.text(" leve esta lista para as lojas indicadas para garantir o menor preço.", 14, 30);
+      let yPos = 40;
 
-      // @ts-ignore
-      yPos = doc.lastAutoTable.finalY + 15;
-    });
+      // Group items by supplier
+      const itemsBySupplier = (analysis.recommendations || []).reduce((acc: Record<string, typeof analysis.recommendations>, rec) => {
+        if (!acc[rec.bestSupplier]) acc[rec.bestSupplier] = [];
+        acc[rec.bestSupplier].push(rec);
+        return acc;
+      }, {});
+
+      Object.entries(itemsBySupplier).forEach(([supplier, items]) => {
+        const storeTotal = items.reduce((sum, item) => {
+          const master = consolidatedItems.find(m => m.name === item.itemName);
+          return sum + (item.price * (master?.totalQuantity || 0));
+        }, 0);
+
+        // Store Header
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        doc.text(`${supplier}`, 14, yPos);
+
+        doc.setFontSize(12);
+        doc.setTextColor(16, 185, 129); // Emerald-500
+        doc.text(`Total Est.: R$ ${storeTotal.toFixed(2)}`, 150, yPos);
+
+        yPos += 5;
+
+        // Table
+        const tableBody = items.map(item => {
+          const master = consolidatedItems.find(m => m.name === item.itemName);
+          return [
+            item.itemName,
+            `x${master?.totalQuantity || 1}`,
+            `R$ ${item.price.toFixed(2)}`,
+            '[   ]'
+          ];
+        });
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Item', 'Qtd', 'Preço Unit.', 'Check']],
+          body: tableBody,
+          theme: 'striped',
+          headStyles: { fillColor: [236, 72, 153] }, // Pink headers
+          styles: { fontSize: 10 },
+          columnStyles: {
+            0: { cellWidth: 90 }, // Item
+            1: { cellWidth: 20 }, // Qtd
+            2: { cellWidth: 30 }, // Price
+            3: { cellWidth: 20, halign: 'center' } // Checkbox
+          }
+        });
+
+        // @ts-ignore
+        yPos = doc.lastAutoTable.finalY + 15;
+      });
+    }
 
     doc.save(`lista_facil_checklist_${today.replace(/\//g, '-')}.pdf`);
   };
