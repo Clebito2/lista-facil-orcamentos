@@ -143,9 +143,17 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
 
           await firebaseService.saveQuote(userId, { ...extracted, totalValue: total });
           onUpdate();
-        } catch (innerError) {
+        } catch (innerError: any) {
           console.error("Erro interno no processamento:", innerError);
-          alert("Não foi possível ler o orçamento. Verifique se a imagem está clara ou se a chave de API está configurada.");
+          const errorMessage = innerError.message || JSON.stringify(innerError) || "Erro desconhecido";
+
+          if (errorMessage.includes("API key")) {
+            alert("Erro de Configuração: Chave da API inválida ou não encontrada. Verifique o console.");
+          } else if (errorMessage.includes("429")) {
+            alert("Erro de Cota: O limite de uso da IA foi atingido. Tente novamente mais tarde.");
+          } else {
+            alert(`Erro ao ler orçamento: ${errorMessage.slice(0, 100)}...`);
+          }
         }
       };
       reader.readAsDataURL(file);

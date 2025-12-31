@@ -32,7 +32,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
       reader.readAsDataURL(file);
     } catch (error) {
       console.error(error);
-      alert("Erro ao processar imagem. Verifique se a conexão está estável e se a foto está nítida.");
+      alert(`Erro ao processar imagem: ${(error as any).message || "Verifique a conexão e tente novamente."}`);
     } finally {
       setTimeout(() => setIsUploading(false), 3000);
     }
