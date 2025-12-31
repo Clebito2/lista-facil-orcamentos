@@ -58,8 +58,14 @@ const AuthScreen: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center p-4">
-            <div className="max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center">
+        <div
+            className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center relative"
+            style={{ backgroundImage: "url('/school-bg.png')" }}
+        >
+            {/* Overlay para garantir leitura */}
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-0"></div>
+
+            <div className="max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center relative z-10">
 
                 {/* Hero Section - Explicação do Sistema */}
                 <div className="text-center md:text-left space-y-6 order-2 md:order-1">
