@@ -13,59 +13,6 @@ interface Props {
 const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) => {
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  if (!analysis) {
-    if (consolidatedItems.length > 0) {
-      return (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-            <div className="text-5xl mb-4 text-pink-500">📊</div>
-            <h2 className="text-xl font-bold text-gray-800">Relatório de Preços</h2>
-            <p className="text-gray-500 max-w-md mx-auto mt-2 mb-6">
-              Adicione pelo menos um <strong>Orçamento</strong> para ver a mágica da comparação de preços.
-            </p>
-
-            <button
-              onClick={generatePDF}
-              className="text-sm font-bold text-white bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-xl shadow-lg shadow-pink-200 flex items-center gap-2 transition-all hover:scale-105"
-            >
-              📄 Baixar Checklist Simples (PDF)
-            </button>
-            <p className="text-xs text-gray-400 mt-2">Gera uma lista limpa para você levar às lojas.</p>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="text-5xl mb-4 text-pink-500">📊</div>
-        <h2 className="text-xl font-bold text-gray-800">Gerar Relatório de Economia</h2>
-        <p className="text-gray-500 max-w-md mx-auto mt-2">
-          Para que possamos calcular o melhor preço, você precisa adicionar pelo menos uma lista de materiais e um orçamento.
-        </p>
-      </div>
-    );
-  }
-
-  const exportCSV = () => {
-    let csv = "Item,Melhor Fornecedor,Preco Unitario,Quantidade Total,Custo Total\n";
-    analysis.recommendations.forEach(rec => {
-      const master = consolidatedItems.find(m => m.name === rec.itemName);
-      const total = rec.price * (master?.totalQuantity || 0);
-      csv += `"${rec.itemName}","${rec.bestSupplier}",${rec.price},${master?.totalQuantity || 0},${total.toFixed(2)}\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "planejamento_lista_facil.csv");
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const generatePDF = () => {
     const doc = new jsPDF();
     const today = new Date().toLocaleDateString('pt-BR');
@@ -166,6 +113,59 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
     }
 
     doc.save(`lista_facil_checklist_${today.replace(/\//g, '-')}.pdf`);
+  };
+
+  if (!analysis) {
+    if (consolidatedItems.length > 0) {
+      return (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+            <div className="text-5xl mb-4 text-pink-500">📊</div>
+            <h2 className="text-xl font-bold text-gray-800">Relatório de Preços</h2>
+            <p className="text-gray-500 max-w-md mx-auto mt-2 mb-6">
+              Adicione pelo menos um <strong>Orçamento</strong> para ver a mágica da comparação de preços.
+            </p>
+
+            <button
+              onClick={generatePDF}
+              className="text-sm font-bold text-white bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-xl shadow-lg shadow-pink-200 flex items-center gap-2 transition-all hover:scale-105"
+            >
+              📄 Baixar Checklist Simples (PDF)
+            </button>
+            <p className="text-xs text-gray-400 mt-2">Gera uma lista limpa para você levar às lojas.</p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="text-5xl mb-4 text-pink-500">📊</div>
+        <h2 className="text-xl font-bold text-gray-800">Gerar Relatório de Economia</h2>
+        <p className="text-gray-500 max-w-md mx-auto mt-2">
+          Para que possamos calcular o melhor preço, você precisa adicionar pelo menos uma lista de materiais e um orçamento.
+        </p>
+      </div>
+    );
+  }
+
+  const exportCSV = () => {
+    let csv = "Item,Melhor Fornecedor,Preco Unitario,Quantidade Total,Custo Total\n";
+    analysis.recommendations.forEach(rec => {
+      const master = consolidatedItems.find(m => m.name === rec.itemName);
+      const total = rec.price * (master?.totalQuantity || 0);
+      csv += `"${rec.itemName}","${rec.bestSupplier}",${rec.price},${master?.totalQuantity || 0},${total.toFixed(2)}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "planejamento_lista_facil.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const COLORS = ['#EC4899', '#6366F1', '#10B981', '#F59E0B', '#3B82F6'];
@@ -355,12 +355,20 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-lg font-bold text-gray-800">Onde comprar (Plano de Compra)</h3>
-          <button
-            onClick={exportCSV}
-            className="text-xs font-bold text-pink-500 hover:text-pink-600 flex items-center gap-1"
-          >
-            📥 Exportar Planejamento (CSV)
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={generatePDF}
+              className="text-xs font-bold text-white bg-pink-500 hover:bg-pink-600 px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+            >
+              📄 Baixar Checklist (PDF)
+            </button>
+            <button
+              onClick={exportCSV}
+              className="text-xs font-bold text-pink-500 hover:text-pink-600 flex items-center gap-1"
+            >
+              📥 Exportar Planejamento (CSV)
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
