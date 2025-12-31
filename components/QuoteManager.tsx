@@ -206,7 +206,6 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
             <input
               type="file"
               accept="image/*,application/pdf"
-              capture="environment"
               id="quote-upload"
               className="hidden"
               onChange={handleQuoteUpload}
