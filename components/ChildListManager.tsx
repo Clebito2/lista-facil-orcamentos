@@ -34,7 +34,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
       console.error(error);
       alert("Erro ao processar imagem. Verifique se a conexão está estável e se a foto está nítida.");
     } finally {
-      setIsUploading(false);
+      setTimeout(() => setIsUploading(false), 3000);
     }
   };
 
@@ -108,7 +108,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
             {isUploading ? (
               <div className="flex flex-col items-center">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
-                <span className="text-blue-600 font-bold">Lendo a lista...</span>
+                <span className="text-blue-600 font-bold">Lendo a lista... Aguarde um momento.</span>
               </div>
             ) : (
               <>

@@ -81,17 +81,17 @@ const App: React.FC = () => {
     }
   }
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     if (!currentUser) return;
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     const [lists, storedQuotes] = await Promise.all([
       firebaseService.getChildLists(currentUser.uid),
       firebaseService.getQuotes(currentUser.uid)
     ]);
     setChildLists(lists);
     setQuotes(storedQuotes);
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   const consolidatedItems = useMemo(() => {
@@ -217,6 +217,7 @@ const App: React.FC = () => {
             analysis={budgetAnalysis}
             consolidatedItems={consolidatedItems}
             quotes={quotes}
+            onRefresh={() => loadData(false)}
           />
         )}
 

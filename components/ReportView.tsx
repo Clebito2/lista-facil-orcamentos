@@ -8,9 +8,10 @@ interface Props {
   analysis: BudgetAnalysis | null;
   consolidatedItems: ConsolidatedItem[];
   quotes: SupplierQuote[];
+  onRefresh: () => void;
 }
 
-const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) => {
+const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes, onRefresh }) => {
   const [searchTerm, setSearchTerm] = React.useState("");
 
   const generatePDF = () => {
@@ -58,7 +59,7 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
       let yPos = 40;
 
       // Group items by supplier
-      const itemsBySupplier = (analysis.recommendations || []).reduce((acc: Record<string, typeof analysis.recommendations>, rec) => {
+      const itemsBySupplier = (analysis.recommendations || []).reduce((acc: Record<string, { itemName: string; bestSupplier: string; price: number; }[]>, rec) => {
         if (!acc[rec.bestSupplier]) acc[rec.bestSupplier] = [];
         acc[rec.bestSupplier].push(rec);
         return acc;
@@ -121,17 +122,35 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
             <div className="text-5xl mb-4 text-pink-500">📊</div>
-            <h2 className="text-xl font-bold text-gray-800">Relatório de Preços</h2>
-            <p className="text-gray-500 max-w-md mx-auto mt-2 mb-6">
-              Adicione pelo menos um <strong>Orçamento</strong> para ver a mágica da comparação de preços.
-            </p>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Relatório de Preços</h2>
+                <p className="text-gray-500 max-w-md mt-2">
+                  Adicione pelo menos um <strong>Orçamento</strong> para ver a mágica da comparação de preços.
+                </p>
+              </div>
+              <button
+                onClick={onRefresh}
+                className="text-sm font-bold text-gray-500 hover:text-pink-600 flex items-center gap-2 bg-gray-50 hover:bg-pink-50 px-4 py-2 rounded-lg transition-colors"
+              >
+                🔄 Recalcular
+              </button>
+            </div>
 
-            <button
-              onClick={generatePDF}
-              className="text-sm font-bold text-white bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-xl shadow-lg shadow-pink-200 flex items-center gap-2 transition-all hover:scale-105"
-            >
-              📄 Baixar Checklist Simples (PDF)
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={generatePDF}
+                className="text-sm font-bold text-white bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-xl shadow-lg shadow-pink-200 flex items-center gap-2 transition-all hover:scale-105"
+              >
+                📄 Baixar Checklist Simples (PDF)
+              </button>
+              <button
+                onClick={onRefresh}
+                className="text-sm font-bold text-pink-500 border-2 border-pink-100 hover:bg-pink-50 px-6 py-3 rounded-xl flex items-center gap-2 transition-all"
+              >
+                🔄 Atualizar
+              </button>
+            </div>
             <p className="text-xs text-gray-400 mt-2">Gera uma lista limpa para você levar às lojas.</p>
           </div>
         </div>
@@ -186,6 +205,16 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
     <div className="space-y-8 animate-in fade-in duration-500">
 
       {/* Share CTA */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black text-gray-800">Relatório de Economia</h2>
+        <button
+          onClick={onRefresh}
+          className="text-sm font-bold text-gray-500 hover:text-pink-600 flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg transition-all hover:shadow-md"
+        >
+          🔄 Recalcular Dados
+        </button>
+      </div>
+
       <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">📢</span>
@@ -352,7 +381,7 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
         </div>
 
         {Object.entries(
-          (analysis?.recommendations || []).reduce((acc: Record<string, typeof analysis.recommendations>, rec) => {
+          (analysis?.recommendations || []).reduce((acc: Record<string, { itemName: string; bestSupplier: string; price: number; }[]>, rec) => {
             if (!acc[rec.bestSupplier]) acc[rec.bestSupplier] = [];
             acc[rec.bestSupplier].push(rec);
             return acc;

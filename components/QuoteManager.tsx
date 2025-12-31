@@ -154,7 +154,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
       alert("Erro ao iniciar upload.");
     } finally {
       // Delay estendido para melhor UX (dá tempo do usuário ver que processou)
-      setTimeout(() => setIsUploading(false), 2500);
+      setTimeout(() => setIsUploading(false), 5000);
     }
   };
 
@@ -203,7 +203,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
               {isUploading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  <span className="text-gray-500">Processando...</span>
+                  <span className="text-gray-500">Processando ({isUploading ? 'Aguarde...' : ''})</span>
                 </>
               ) : (
                 '📷 Upload de Foto/PDF'
