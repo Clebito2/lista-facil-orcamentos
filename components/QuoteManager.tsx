@@ -44,7 +44,16 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
           extracted.items.forEach(qi => {
             const master = masterItems.find(m => m.name.toLowerCase().trim() === qi.itemName.toLowerCase().trim());
             if (master) {
-              total += qi.unitPrice * master.totalQuantity;
+              let qty = master.totalQuantity;
+              // Fix for Sulfite/Paper unit mismatch (500 sheets vs 1 pack)
+              const isPaper = /sulfite|papel|a4/i.test(master.name);
+              const isHighQty = qty >= 100;
+              const isPackPrice = qi.unitPrice > 1.0;
+
+              if (isPaper && isHighQty && isPackPrice) {
+                qty = Math.ceil(qty / 500);
+              }
+              total += qi.unitPrice * qty;
             }
           });
 
@@ -172,8 +181,9 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
                       </div>
                       {master && (
                         <div className="mt-1 pt-1 border-t border-gray-200 flex justify-between text-[10px]">
-                          <span>Total ({master.totalQuantity}x):</span>
-                          <span className="font-semibold">R$ {(item.unitPrice * master.totalQuantity).toFixed(2)}</span>
+                          {/* Lógica de correção para Sulfite: Se qtd > 100 e preço > 1, assume que é pacote e divide por 500 */}
+                          <span>Total ({(master.totalQuantity >= 100 && /sulfite|papel|a4/i.test(master.name) && item.unitPrice > 1.0) ? Math.ceil(master.totalQuantity / 500) : master.totalQuantity}x):</span>
+                          <span className="font-semibold">R$ {(item.unitPrice * ((master.totalQuantity >= 100 && /sulfite|papel|a4/i.test(master.name) && item.unitPrice > 1.0) ? Math.ceil(master.totalQuantity / 500) : master.totalQuantity)).toFixed(2)}</span>
                         </div>
                       )}
                     </div>
