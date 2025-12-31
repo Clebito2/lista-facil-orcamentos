@@ -23,8 +23,11 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
     try {
       const reader = new FileReader();
       reader.onload = async () => {
-        const base64 = (reader.result as string).split(',')[1];
-        const { listTitle, items } = await extractItemsFromImage(base64);
+        const result = reader.result as string;
+        const mimeType = result.split(';')[0].split(':')[1];
+        const base64 = result.split(',')[1];
+
+        const { listTitle, items } = await extractItemsFromImage(base64, mimeType);
 
         await firebaseService.saveChildList(userId, listTitle, items);
         onUpdate();
@@ -94,7 +97,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
         <div className="relative w-full max-w-sm">
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
             id="file-upload"
             className="hidden"
             onChange={handleFileUpload}

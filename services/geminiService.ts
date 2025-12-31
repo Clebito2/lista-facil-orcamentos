@@ -24,14 +24,14 @@ export interface ExtractedListResponse {
   items: Omit<SchoolItem, 'id'>[];
 }
 
-export const extractItemsFromImage = async (base64Image: string): Promise<ExtractedListResponse> => {
+export const extractItemsFromImage = async (base64Image: string, mimeType: string): Promise<ExtractedListResponse> => {
   const model = "gemini-3-flash-preview";
 
   const response = await ai.models.generateContent({
     model,
     contents: {
       parts: [
-        { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
+        { inlineData: { data: base64Image, mimeType: mimeType } },
         { text: "Extraia os itens desta lista de material escolar. Identifique também um título sugerido para a lista (ex: 'Lista 2026', 'Material 3º Ano'). Retorne um objeto JSON com 'listTitle' (string) e 'items' (array) contendo nome do item, quantidade e categoria simples. REGRA CRÍTICA PARA PAPEL/SULFITE: Se a lista pedir '500 folhas' de papel, '1 resma' ou '1 pacote de folha', a QUANTIDADE deve ser sempre 1 (UM). O nome do item deve ser 'Resma de Papel A4' ou 'Pacote 500 folhas'. NUNCA retorne quantidade 500 para papel. Para outros itens vendidos em caixa (lápis, tinta), a quantidade também é o número de CAIXAS, não de unidades soltas." }
       ]
     },
