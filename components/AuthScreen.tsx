@@ -110,110 +110,112 @@ const AuthScreen: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Auth Card */}
-                <div className="bg-white rounded-3xl shadow-2xl p-8 order-1 md:order-2 border border-gray-100">
-                    <div className="text-center mb-8">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                            {isLogin ? 'Bem-vindo! 👋' : 'Criar nova conta 🎉'}
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                            {isLogin ? 'Entre para acessar suas listas' : 'Comece a economizar agora'}
-                        </p>
-                    </div>
-
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
-                            <span>⚠️</span>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    {success && (
-                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-center gap-2">
-                            <span>✅</span>
-                            <span>{success}</span>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                                placeholder="seu@email.com"
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Senha
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                                placeholder="••••••••"
-                                disabled={loading}
-                            />
-                            <p className="text-xs text-gray-400 mt-1">Mínimo de 6 caracteres</p>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all shadow-lg shadow-pink-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    Processando...
-                                </span>
-                            ) : (
-                                isLogin ? 'Entrar' : 'Criar Conta'
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="mt-6 text-center">
-                        <button
-                            onClick={() => {
-                                setIsLogin(!isLogin);
-                                setError('');
-                                setSuccess('');
-                            }}
-                            className="text-sm text-pink-600 hover:text-pink-700 font-medium transition-colors"
-                        >
-                            {isLogin ? 'Não tem conta? Cadastre-se aqui' : 'Já tem conta? Faça login'}
-                        </button>
-                    </div>
-
-                    {!isLogin && (
-                        <div className="mt-6 p-4 bg-purple-50 border border-purple-100 rounded-xl">
-                            <p className="text-xs text-gray-600 text-center">
-                                ℹ️ Ao criar uma conta, o administrador receberá uma notificação por email.
+                {/* Right Column: Auth Card + Advertise Button */}
+                <div className="order-1 md:order-2 flex flex-col gap-6">
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                                {isLogin ? 'Bem-vindo! 👋' : 'Criar nova conta 🎉'}
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                {isLogin ? 'Entre para acessar suas listas' : 'Comece a economizar agora'}
                             </p>
                         </div>
-                    )}
-                </div>
 
-                {/* Advertise Button */}
-                <div className="w-full text-center mt-6 order-3 md:order-3">
-                    <a
-                        href="https://api.whatsapp.com/send/?phone=5561996993134&text=Ol%C3%A1%2C+gostaria+de+saber+mais+sobre+como+anunciar+no+Lista+F%C3%A1cil&type=phone_number&app_absent=0"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-pink-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all group"
-                    >
-                        <span className="text-xl">📢</span>
-                        <span className="font-bold text-gray-700 group-hover:text-pink-600">Quer divulgar sua papelaria aqui? <span className="text-pink-500">Anuncie conosco</span></span>
-                    </a>
+                        {error && (
+                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
+                                <span>⚠️</span>
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-center gap-2">
+                                <span>✅</span>
+                                <span>{success}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                                    placeholder="seu@email.com"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                    Senha
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                                    placeholder="••••••••"
+                                    disabled={loading}
+                                />
+                                <p className="text-xs text-gray-400 mt-1">Mínimo de 6 caracteres</p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all shadow-lg shadow-pink-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                        Processando...
+                                    </span>
+                                ) : (
+                                    isLogin ? 'Entrar' : 'Criar Conta'
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={() => {
+                                    setIsLogin(!isLogin);
+                                    setError('');
+                                    setSuccess('');
+                                }}
+                                className="text-sm text-pink-600 hover:text-pink-700 font-medium transition-colors"
+                            >
+                                {isLogin ? 'Não tem conta? Cadastre-se aqui' : 'Já tem conta? Faça login'}
+                            </button>
+                        </div>
+
+                        {!isLogin && (
+                            <div className="mt-6 p-4 bg-purple-50 border border-purple-100 rounded-xl">
+                                <p className="text-xs text-gray-600 text-center">
+                                    ℹ️ Ao criar uma conta, o administrador receberá uma notificação por email.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Advertise Button */}
+                    <div className="w-full text-center">
+                        <a
+                            href="https://api.whatsapp.com/send/?phone=5561996993134&text=Ol%C3%A1%2C+gostaria+de+saber+mais+sobre+como+anunciar+no+Lista+F%C3%A1cil&type=phone_number&app_absent=0"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-pink-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all group"
+                        >
+                            <span className="text-xl">📢</span>
+                            <span className="font-bold text-gray-700 group-hover:text-pink-600">Quer divulgar sua papelaria aqui? <span className="text-pink-500">Anuncie conosco</span></span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
