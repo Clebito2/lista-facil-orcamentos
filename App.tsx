@@ -183,9 +183,8 @@ const App: React.FC = () => {
       style={{ backgroundImage: "url('/desk-bg.png')" }}
     >
       <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] z-0"></div>
-      <div className="relative z-10">
-        <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
-      </div>
+
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
 
       <main className="max-w-5xl mx-auto px-4 pt-24 relative z-10">
         {activeTab === 'lists' && (
