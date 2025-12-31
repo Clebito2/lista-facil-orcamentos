@@ -229,3 +229,6 @@ const AuthScreen: React.FC = () => {
             </footer>
         </div>
     );
+};
+
+export default AuthScreen;
