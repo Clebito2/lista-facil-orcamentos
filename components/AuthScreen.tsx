@@ -200,30 +200,32 @@ const AuthScreen: React.FC = () => {
                                 ℹ️ Ao criar uma conta, o administrador receberá uma notificação por email.
                             </p>
                         </div>
-
-                {/* Advertise Button */}
-                    <div className="w-full text-center mt-6 order-3 md:order-3">
-                        <a
-                            href="https://api.whatsapp.com/send/?phone=5561996993134&text=Ol%C3%A1%2C+gostaria+de+saber+mais+sobre+como+anunciar+no+Lista+F%C3%A1cil&type=phone_number&app_absent=0"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-pink-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all group"
-                        >
-                            <span className="text-xl">📢</span>
-                            <span className="font-bold text-gray-700 group-hover:text-pink-600">Quer divulgar sua papelaria aqui? <span className="text-pink-500">Anuncie conosco</span></span>
-                        </a>
-                    </div>
+                    )}
                 </div>
 
-                <footer className="absolute bottom-4 text-center text-gray-400 text-xs w-full z-20">
+                {/* Advertise Button */}
+                <div className="w-full text-center mt-6 order-3 md:order-3">
                     <a
-                        href="https://api.whatsapp.com/send/?phone=5561996993134&text&type=phone_number&app_absent=0"
+                        href="https://api.whatsapp.com/send/?phone=5561996993134&text=Ol%C3%A1%2C+gostaria+de+saber+mais+sobre+como+anunciar+no+Lista+F%C3%A1cil&type=phone_number&app_absent=0"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-pink-600 transition-colors"
+                        className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-pink-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all group"
                     >
-                        Desenvolvido por Cléber Donato
+                        <span className="text-xl">📢</span>
+                        <span className="font-bold text-gray-700 group-hover:text-pink-600">Quer divulgar sua papelaria aqui? <span className="text-pink-500">Anuncie conosco</span></span>
                     </a>
-                </footer>
+                </div>
             </div>
-            );
+
+            <footer className="absolute bottom-4 text-center text-gray-400 text-xs w-full z-20">
+                <a
+                    href="https://api.whatsapp.com/send/?phone=5561996993134&text&type=phone_number&app_absent=0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-pink-600 transition-colors"
+                >
+                    Desenvolvido por Cléber Donato
+                </a>
+            </footer>
+        </div>
+    );
