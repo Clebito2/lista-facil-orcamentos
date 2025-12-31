@@ -161,6 +161,51 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
         </div>
       </div>
 
+      {/* SHOPPING LIST BY STORE (MIXED STRATEGY) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="col-span-full">
+          <h3 className="text-lg font-bold text-gray-800 mb-2">🛍️ Lista de Compras por Loja (Estratégia Mista)</h3>
+          <p className="text-gray-500 text-sm mb-4">Compre estes itens em cada loja para garantir o menor preço total.</p>
+        </div>
+
+        {Object.entries(
+          (analysis?.recommendations || []).reduce((acc: Record<string, typeof analysis.recommendations>, rec) => {
+            if (!acc[rec.bestSupplier]) acc[rec.bestSupplier] = [];
+            acc[rec.bestSupplier].push(rec);
+            return acc;
+          }, {})
+        ).map(([supplier, items]) => {
+          const storeList = items;
+          const storeTotal = storeList.reduce((sum, item) => {
+            const master = consolidatedItems.find(m => m.name === item.itemName);
+            return sum + (item.price * (master?.totalQuantity || 0));
+          }, 0);
+
+          return (
+            <div key={supplier} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+              <div className="border-b border-gray-100 pb-4 mb-4">
+                <h4 className="font-bold text-lg text-gray-800">{supplier}</h4>
+                <p className="text-emerald-600 font-black text-xl">R$ {storeTotal.toFixed(2)}</p>
+              </div>
+              <ul className="space-y-3 flex-1">
+                {storeList.map((item, idx) => {
+                  const master = consolidatedItems.find(m => m.name === item.itemName);
+                  return (
+                    <li key={idx} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{item.itemName}</span>
+                      <span className="font-bold text-gray-800">x{master?.totalQuantity}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+              <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{storeList.length} itens</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-lg font-bold text-gray-800">Onde comprar (Plano de Compra)</h3>

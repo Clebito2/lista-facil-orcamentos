@@ -115,7 +115,8 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
                     <h3 className="text-xl font-bold text-gray-800">{list.title}</h3>
                     <button
                       onClick={() => startEdit(list.id, list.title)}
-                      className="opacity-0 group-hover/edit:opacity-100 text-gray-400 hover:text-pink-500 transition-opacity"
+                      className="text-gray-400 hover:text-pink-500 transition-colors"
+                      title="Editar nome"
                     >
                       ✏️
                     </button>
@@ -125,7 +126,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
               </div>
               <button
                 onClick={() => handleDelete(list.id)}
-                className="text-gray-300 group-hover:text-red-500 transition-colors p-1"
+                className="text-gray-300 hover:text-red-500 transition-colors p-1"
                 title="Excluir lista"
               >
                 🗑️
@@ -147,7 +148,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

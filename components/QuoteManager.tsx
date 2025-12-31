@@ -108,8 +108,8 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
             >
               {isUploading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                  <span>Analisando...</span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                  <span className="text-gray-500">Processando...</span>
                 </>
               ) : (
                 '💰 Adicionar Orçamento'
@@ -142,7 +142,8 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
                     <h3 className="text-lg font-bold text-gray-800">{quote.supplierName}</h3>
                     <button
                       onClick={() => startEdit(quote.id, quote.supplierName)}
-                      className="opacity-0 group-hover/edit:opacity-100 text-gray-400 hover:text-pink-500 transition-opacity"
+                      className="text-gray-400 hover:text-pink-500 transition-colors"
+                      title="Editar nome"
                     >
                       ✏️
                     </button>

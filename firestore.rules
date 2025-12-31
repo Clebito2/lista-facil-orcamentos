@@ -1,16 +1,17 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra global: usuários autenticados só podem acessar seus próprios dados
-    match /users/{userId}/{document=**} {
-      // Permite leitura e escrita apenas se o userId do documento for o mesmo do usuário autenticado
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Bloquear todo o resto
+    // Regra Global: Bloqueia tudo por padrão
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    // Regra de Usuários: Cada usuário só acessa seus próprios dados
+    // Caminho: /users/{userId}/...
+    match /users/{userId}/{document=**} {
+      // Permite ler/gravar SE o ID do usuário logado (request.auth.uid)
+      // for igual ao ID da coleção que está tentando acessar (userId)
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

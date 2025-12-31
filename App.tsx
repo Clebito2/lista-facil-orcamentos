@@ -156,6 +156,11 @@ const App: React.FC = () => {
             quotes={quotes}
           />
         )}
+
+        <footer className="mt-20 mb-10 text-center text-gray-400 text-sm">
+          <p>© {new Date().getFullYear()} Lista Fácil. Todos os direitos reservados.</p>
+          <p className="font-medium mt-1">Desenvolvido por Cléber Donato</p>
+        </footer>
       </main>
 
       {/* Persistent Bottom Nav for Mobile */}
