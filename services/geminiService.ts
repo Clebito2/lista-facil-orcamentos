@@ -25,7 +25,7 @@ export interface ExtractedListResponse {
 }
 
 export const extractItemsFromImage = async (base64Image: string): Promise<ExtractedListResponse> => {
-  const model = "gemini-3-flash-preview";
+  const model = "gemini-1.5-flash";
 
   const response = await ai.models.generateContent({
     model,
@@ -68,7 +68,7 @@ export const extractItemsFromImage = async (base64Image: string): Promise<Extrac
 };
 
 export const analyzeQuoteFromImage = async (base64Image: string, mimeType: string, masterListNames: string[]): Promise<Omit<SupplierQuote, 'id' | 'totalValue'>> => {
-  const model = "gemini-3-flash-preview";
+  const model = "gemini-1.5-flash";
 
   const response = await ai.models.generateContent({
     model,
