@@ -11,6 +11,14 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
+export const checkGeminiKey = () => {
+  return {
+    present: !!apiKey,
+    preview: apiKey ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : 'N/A',
+    source: import.meta.env.VITE_GEMINI_API_KEY ? 'VITE_ENV' : (process.env.GEMINI_API_KEY ? 'PROCESS_ENV' : 'NONE')
+  };
+};
+
 export interface ExtractedListResponse {
   listTitle: string;
   items: Omit<SchoolItem, 'id'>[];

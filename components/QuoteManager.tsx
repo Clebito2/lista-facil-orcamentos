@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { SupplierQuote, ConsolidatedItem } from '../types';
-import { analyzeQuoteFromImage } from '../services/geminiService';
+import { analyzeQuoteFromImage, checkGeminiKey } from '../services/geminiService';
 import { firebaseService } from '../services/firebaseService';
 
 interface Props {
