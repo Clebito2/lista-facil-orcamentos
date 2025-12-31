@@ -59,6 +59,27 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+
+      {/* Share CTA */}
+      <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📢</span>
+          <div>
+            <h3 className="font-bold text-green-800">Encontrou preços baixos e quer divulgar para outros pais?</h3>
+            <p className="text-sm text-green-600">Compartilhe sua descoberta e ajude a comunidade.</p>
+          </div>
+        </div>
+        <a
+          href="https://api.whatsapp.com/send/?phone=5561996993134&text&type=phone_number&app_absent=0"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl transition-colors shadow-lg shadow-green-200 flex items-center gap-2"
+        >
+          <span>💬</span>
+          Clique aqui
+        </a>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-pink-500 text-white p-6 rounded-2xl shadow-lg shadow-pink-200">
           <p className="text-xs uppercase font-bold opacity-80">Melhor Opção (Loja Única)</p>

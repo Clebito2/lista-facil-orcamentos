@@ -85,8 +85,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
             ) : (
               <>
                 <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-blue-500 rounded-2xl flex items-center justify-center text-white text-3xl mb-4 shadow-lg shadow-pink-200">📸</div>
-                <span className="text-gray-700 font-bold">Enviar Foto da Lista</span>
-                <span className="text-xs text-gray-400 mt-1">A IA faz todo o trabalho por você</span>
+                <span className="text-gray-700 font-bold text-center">Enviar lista de materiais solicitados pela escola</span>
               </>
             )}
           </label>

@@ -124,8 +124,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20">
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
+    <div
+      className="min-h-screen pb-20 bg-cover bg-center relative bg-fixed"
+      style={{ backgroundImage: "url('/desk-bg.png')" }}
+    >
+      <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] z-0"></div>
+      <div className="relative z-10">
+        <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
+      </div>
 
       <main className="max-w-5xl mx-auto px-4 pt-24">
         {activeTab === 'lists' && (
@@ -157,9 +163,16 @@ const App: React.FC = () => {
           />
         )}
 
-        <footer className="mt-20 mb-10 text-center text-gray-400 text-sm">
+        <footer className="mt-20 mb-10 text-center text-gray-400 text-sm relative z-10">
           <p>© {new Date().getFullYear()} Lista Fácil. Todos os direitos reservados.</p>
-          <p className="font-medium mt-1">Desenvolvido por Cléber Donato</p>
+          <a
+            href="https://api.whatsapp.com/send/?phone=5561996993134&text&type=phone_number&app_absent=0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium mt-1 hover:text-pink-500 transition-colors inline-block"
+          >
+            Desenvolvido por Cléber Donato
+          </a>
         </footer>
       </main>
 

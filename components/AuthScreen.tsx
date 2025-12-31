@@ -203,7 +203,17 @@ const AuthScreen: React.FC = () => {
                     )}
                 </div>
             </div>
-        </div>
+            <footer className="absolute bottom-4 text-center text-gray-400 text-xs w-full z-20">
+                <a
+                    href="https://api.whatsapp.com/send/?phone=5561996993134&text&type=phone_number&app_absent=0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-pink-600 transition-colors"
+                >
+                    Desenvolvido por Cléber Donato
+                </a>
+            </footer>
+        </div >
     );
 };
 
