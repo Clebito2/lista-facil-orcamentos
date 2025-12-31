@@ -1,0 +1,180 @@
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChildList, SupplierQuote, ConsolidatedItem, BudgetAnalysis } from './types';
+import { firebaseService } from './services/firebaseService';
+import { useAuth } from './contexts/AuthContext';
+import AuthScreen from './components/AuthScreen';
+import Header from './components/Header';
+import ChildListManager from './components/ChildListManager';
+import MasterList from './components/MasterList';
+import QuoteManager from './components/QuoteManager';
+import ReportView from './components/ReportView';
+
+const App: React.FC = () => {
+  const { currentUser, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<'lists' | 'master' | 'quotes' | 'report'>('lists');
+  const [childLists, setChildLists] = useState<ChildList[]>([]);
+  const [quotes, setQuotes] = useState<SupplierQuote[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadData();
+    }
+  }, [currentUser]);
+
+  const loadData = async () => {
+    if (!currentUser) return;
+
+    setLoading(true);
+    const [lists, storedQuotes] = await Promise.all([
+      firebaseService.getChildLists(currentUser.uid),
+      firebaseService.getQuotes(currentUser.uid)
+    ]);
+    setChildLists(lists);
+    setQuotes(storedQuotes);
+    setLoading(false);
+  };
+
+  const consolidatedItems = useMemo(() => {
+    const map = new Map<string, ConsolidatedItem>();
+
+    childLists.forEach(list => {
+      list.items.forEach(item => {
+        const key = item.name.toLowerCase().trim();
+        if (map.has(key)) {
+          const existing = map.get(key)!;
+          existing.totalQuantity += item.quantity;
+          existing.items.push(item);
+        } else {
+          map.set(key, {
+            name: item.name,
+            totalQuantity: item.quantity,
+            items: [item]
+          });
+        }
+      });
+    });
+
+    return Array.from(map.values());
+  }, [childLists]);
+
+  const budgetAnalysis = useMemo((): BudgetAnalysis | null => {
+    if (consolidatedItems.length === 0 || quotes.length === 0) return null;
+
+    const recommendations = consolidatedItems.map(masterItem => {
+      let bestPrice = Infinity;
+      let bestSupplier = "Não cotado";
+
+      quotes.forEach(quote => {
+        const found = quote.items.find(qi =>
+          qi.itemName.toLowerCase().trim() === masterItem.name.toLowerCase().trim()
+        );
+        if (found && found.unitPrice < bestPrice) {
+          bestPrice = found.unitPrice;
+          bestSupplier = quote.supplierName;
+        }
+      });
+
+      return {
+        itemName: masterItem.name,
+        bestSupplier,
+        price: bestPrice === Infinity ? 0 : bestPrice
+      };
+    });
+
+    const supplierTotals = quotes.map(quote => {
+      const total = consolidatedItems.reduce((sum, masterItem) => {
+        const found = quote.items.find(qi =>
+          qi.itemName.toLowerCase().trim() === masterItem.name.toLowerCase().trim()
+        );
+        return sum + (found ? found.unitPrice * masterItem.totalQuantity : 0);
+      }, 0);
+      return { name: quote.supplierName, total };
+    });
+
+    const bestGlobal = [...supplierTotals].sort((a, b) => a.total - b.total)[0];
+    const splitTotal = recommendations.reduce((sum, rec) => {
+      const master = consolidatedItems.find(m => m.name === rec.itemName);
+      return sum + (rec.price * (master?.totalQuantity || 0));
+    }, 0);
+
+    return {
+      bestGlobalSupplier: bestGlobal.name,
+      bestGlobalTotal: bestGlobal.total,
+      splitSupplierTotal: splitTotal,
+      recommendations
+    };
+  }, [consolidatedItems, quotes]);
+
+  // Show auth screen if not logged in
+  if (!currentUser) {
+    return <AuthScreen />;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-pink-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-pink-600 font-medium">Carregando seus dados...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-20">
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
+
+      <main className="max-w-5xl mx-auto px-4 pt-24">
+        {activeTab === 'lists' && (
+          <ChildListManager
+            childLists={childLists}
+            onUpdate={loadData}
+            userId={currentUser.uid}
+          />
+        )}
+
+        {activeTab === 'master' && (
+          <MasterList items={consolidatedItems} />
+        )}
+
+        {activeTab === 'quotes' && (
+          <QuoteManager
+            quotes={quotes}
+            masterItems={consolidatedItems}
+            onUpdate={loadData}
+            userId={currentUser.uid}
+          />
+        )}
+
+        {activeTab === 'report' && (
+          <ReportView
+            analysis={budgetAnalysis}
+            consolidatedItems={consolidatedItems}
+            quotes={quotes}
+          />
+        )}
+      </main>
+
+      {/* Persistent Bottom Nav for Mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 md:hidden">
+        <button onClick={() => setActiveTab('lists')} className={`p-2 ${activeTab === 'lists' ? 'text-pink-500' : 'text-gray-400'}`}>
+          Listas
+        </button>
+        <button onClick={() => setActiveTab('master')} className={`p-2 ${activeTab === 'master' ? 'text-pink-500' : 'text-gray-400'}`}>
+          Resumo
+        </button>
+        <button onClick={() => setActiveTab('quotes')} className={`p-2 ${activeTab === 'quotes' ? 'text-pink-500' : 'text-gray-400'}`}>
+          Orçamentos
+        </button>
+        <button onClick={() => setActiveTab('report')} className={`p-2 ${activeTab === 'report' ? 'text-pink-500' : 'text-gray-400'}`}>
+          Relatório
+        </button>
+      </nav>
+    </div>
+  );
+};
+
+export default App;

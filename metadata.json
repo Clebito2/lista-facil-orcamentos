@@ -1,0 +1,7 @@
+{
+  "name": "Lista Fácil: Orçamentos Escolares",
+  "description": "Uma ferramenta inteligente para gerenciar listas de materiais escolares, consolidando quantidades e encontrando os melhores preços através de IA.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

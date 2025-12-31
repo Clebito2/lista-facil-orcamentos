@@ -1,0 +1,102 @@
+
+import { GoogleGenAI, Type } from "@google/genai";
+import { SchoolItem, SupplierQuote } from "../types";
+
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("ERRO CRÍTICO: Chave da API Gemini não encontrada. Verifique se o arquivo .env existe e contém VITE_GEMINI_API_KEY.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
+
+export interface ExtractedListResponse {
+  listTitle: string;
+  items: Omit<SchoolItem, 'id'>[];
+}
+
+export const extractItemsFromImage = async (base64Image: string): Promise<ExtractedListResponse> => {
+  const model = "gemini-3-flash-preview";
+
+  const response = await ai.models.generateContent({
+    model,
+    contents: {
+      parts: [
+        { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
+        { text: "Extraia os itens desta lista de material escolar. Identifique também um título sugerido para a lista (ex: 'Lista 2026', 'Material 3º Ano'). Retorne um objeto JSON com 'listTitle' (string) e 'items' (array) contendo nome do item, quantidade e categoria simples. ATENÇÃO ÀS UNIDADES DE MEDIDA: Se o item for vendido em pacotes, caixas ou resmas (ex: '1 pacote de 500 folhas', '1 caixa de lápis'), a QUANTIDADE deve ser o número de pacotes/caixas (ex: 1), e NÃO o conteúdo interno (ex: 500). Mantenha a descrição '500 folhas' no nome do item." }
+      ]
+    },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          listTitle: { type: Type.STRING },
+          items: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                quantity: { type: Type.NUMBER },
+                category: { type: Type.STRING }
+              },
+              required: ["name", "quantity", "category"]
+            }
+          }
+        },
+        required: ["listTitle", "items"]
+      }
+    }
+  });
+
+  try {
+    return JSON.parse(response.text || '{"listTitle": "Lista Nova", "items": []}');
+  } catch (error) {
+    console.error("Erro ao parsear JSON do Gemini:", error);
+    return { listTitle: "Lista Nova", items: [] };
+  }
+};
+
+export const analyzeQuoteFromImage = async (base64Image: string, mimeType: string, masterListNames: string[]): Promise<Omit<SupplierQuote, 'id' | 'totalValue'>> => {
+  const model = "gemini-3-flash-preview";
+
+  const response = await ai.models.generateContent({
+    model,
+    contents: {
+      parts: [
+        { inlineData: { data: base64Image, mimeType: mimeType } }, // dynamic mimeType
+        { text: `Extraia as informações deste orçamento de papelaria. Identifique o nome do fornecedor e os preços unitários de cada item. Tente associar os itens encontrados com estes nomes da lista oficial: ${masterListNames.join(", ")}. Retorne apenas um JSON puro. ATENÇÃO: Se o item for vendido em pacote/resma (ex: sulfite 500 folhas), o preço unitário deve ser do PACOTE, não da folha avulsa.` }
+      ]
+    },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          supplierName: { type: Type.STRING },
+          date: { type: Type.STRING },
+          items: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                itemName: { type: Type.STRING },
+                unitPrice: { type: Type.NUMBER }
+              },
+              required: ["itemName", "unitPrice"]
+            }
+          }
+        },
+        required: ["supplierName", "items"]
+      }
+    }
+  });
+
+  try {
+    return JSON.parse(response.text || "{}");
+  } catch (error) {
+    console.error("Erro ao parsear orçamento do Gemini:", error);
+    return { supplierName: "Desconhecido", date: new Date().toISOString(), items: [] };
+  }
+};
