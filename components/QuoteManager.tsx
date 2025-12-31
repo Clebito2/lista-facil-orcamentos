@@ -60,8 +60,8 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
       console.error(error);
       alert("Erro ao iniciar upload.");
     } finally {
-      // Pequeno delay para garantir que o loading saia apenas após o processamento
-      setTimeout(() => setIsUploading(false), 500);
+      // Delay estendido para melhor UX (dá tempo do usuário ver que processou)
+      setTimeout(() => setIsUploading(false), 2500);
     }
   };
 
