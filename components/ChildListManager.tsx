@@ -95,6 +95,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
           <input
             type="file"
             accept="image/*"
+            capture="environment"
             id="file-upload"
             className="hidden"
             onChange={handleFileUpload}

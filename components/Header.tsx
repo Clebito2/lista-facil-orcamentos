@@ -10,39 +10,40 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onLogout, userEmail }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const menuItems = [
+    { id: 'lists', label: 'Listas' },
+    { id: 'master', label: 'Lista Consolidada' },
+    { id: 'quotes', label: 'Orçamentos' },
+    { id: 'report', label: 'Relatório' },
+  ] as const;
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Hamburger Icon */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-gray-700 p-1"
+          >
+            <span className="text-2xl">☰</span>
+          </button>
+
           <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-blue-500 rounded-lg flex items-center justify-center text-white text-lg shadow-lg shadow-pink-200">📖</div>
           <h1 className="text-xl font-black bg-gradient-to-r from-pink-600 to-blue-600 bg-clip-text text-transparent hidden sm:block tracking-tight">Lista Fácil</h1>
         </div>
         <nav className="hidden md:flex gap-6">
-          <button
-            onClick={() => setActiveTab('lists')}
-            className={`font-medium transition-colors ${activeTab === 'lists' ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-blue-600 font-bold' : 'text-gray-500 hover:text-pink-400'}`}
-          >
-            Listas
-          </button>
-          <button
-            onClick={() => setActiveTab('master')}
-            className={`font-medium transition-colors ${activeTab === 'master' ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-blue-600 font-bold' : 'text-gray-500 hover:text-pink-400'}`}
-          >
-            Lista Consolidada
-          </button>
-          <button
-            onClick={() => setActiveTab('quotes')}
-            className={`font-medium transition-colors ${activeTab === 'quotes' ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-blue-600 font-bold' : 'text-gray-500 hover:text-pink-400'}`}
-          >
-            Orçamentos
-          </button>
-          <button
-            onClick={() => setActiveTab('report')}
-            className={`font-medium transition-colors ${activeTab === 'report' ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-blue-600 font-bold' : 'text-gray-500 hover:text-pink-400'}`}
-          >
-            Relatório
-          </button>
+          {menuItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`font-medium transition-colors ${activeTab === item.id ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-blue-600 font-bold' : 'text-gray-500 hover:text-pink-400'}`}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
 
         {/* User menu */}
@@ -81,6 +82,29 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onLogout, user
           )}
         </div>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-xl animate-in slide-in-from-top-10 z-40">
+          <div className="flex flex-col p-4 space-y-2">
+            {menuItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setIsMenuOpen(false);
+                }}
+                className={`p-3 rounded-xl text-left font-medium transition-colors ${activeTab === item.id
+                    ? 'bg-pink-50 text-pink-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   );
 };

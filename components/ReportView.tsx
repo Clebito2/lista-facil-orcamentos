@@ -240,51 +240,88 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
         </div>
 
         {searchTerm && (
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-100 text-gray-600">
-                <tr>
-                  <th className="px-4 py-2 rounded-tl-lg">Item</th>
-                  {quotes.map(q => (
-                    <th key={q.id} className="px-4 py-2">{q.supplierName}</th>
-                  ))}
-                  <th className="px-4 py-2 font-bold text-emerald-600 rounded-tr-lg">Melhor Preço</th>
-                </tr>
-              </thead>
-              <tbody>
-                {consolidatedItems.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase())).map(item => {
-                  // Find prices in all quotes
-                  const prices = quotes.map(q => {
-                    const match = q.items.find(qi => qi.itemName.toLowerCase().trim() === item.name.toLowerCase().trim());
-                    return match ? match.unitPrice : null;
-                  });
-                  // Find min price
-                  const validPrices = prices.filter(p => p !== null) as number[];
-                  const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : 0;
+          <div className="mt-6">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-100 text-gray-600">
+                  <tr>
+                    <th className="px-4 py-2 rounded-tl-lg">Item</th>
+                    {quotes.map(q => (
+                      <th key={q.id} className="px-4 py-2">{q.supplierName}</th>
+                    ))}
+                    <th className="px-4 py-2 font-bold text-emerald-600 rounded-tr-lg">Melhor Preço</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {consolidatedItems.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase())).map(item => {
+                    const prices = quotes.map(q => {
+                      const match = q.items.find(qi => qi.itemName.toLowerCase().trim() === item.name.toLowerCase().trim());
+                      return match ? match.unitPrice : null;
+                    });
+                    const validPrices = prices.filter(p => p !== null) as number[];
+                    const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : 0;
 
-                  return (
-                    <tr key={item.name} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
-                      {quotes.map((q, idx) => {
-                        const price = prices[idx];
-                        const isBest = price === minPrice && price !== null;
-                        return (
-                          <td key={q.id} className={`px-4 py-3 ${isBest ? 'font-bold text-green-600 bg-green-50' : 'text-gray-500'}`}>
-                            {price ? `R$ ${price.toFixed(2)}` : '-'}
-                          </td>
-                        );
-                      })}
-                      <td className="px-4 py-3 font-bold text-emerald-600">
-                        {minPrice > 0 ? `R$ ${minPrice.toFixed(2)}` : '-'}
-                      </td>
-                    </tr>
-                  )
-                })}
-                {consolidatedItems.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-                  <tr><td colSpan={quotes.length + 2} className="px-4 py-8 text-center text-gray-400">Nenhum item encontrado.</td></tr>
-                )}
-              </tbody>
-            </table>
+                    return (
+                      <tr key={item.name} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
+                        {quotes.map((q, idx) => {
+                          const price = prices[idx];
+                          const isBest = price === minPrice && price !== null;
+                          return (
+                            <td key={q.id} className={`px-4 py-3 ${isBest ? 'font-bold text-green-600 bg-green-50' : 'text-gray-500'}`}>
+                              {price ? `R$ ${price.toFixed(2)}` : '-'}
+                            </td>
+                          );
+                        })}
+                        <td className="px-4 py-3 font-bold text-emerald-600">
+                          {minPrice > 0 ? `R$ ${minPrice.toFixed(2)}` : '-'}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+              {consolidatedItems.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase())).map(item => {
+                const prices = quotes.map(q => {
+                  const match = q.items.find(qi => qi.itemName.toLowerCase().trim() === item.name.toLowerCase().trim());
+                  return { price: match ? match.unitPrice : null, supplier: q.supplierName };
+                });
+                const validPrices = prices.filter(p => p.price !== null);
+                const minPrice = validPrices.length > 0 ? Math.min(...validPrices.map(p => p.price!)) : 0;
+
+                return (
+                  <div key={item.name} className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-bold text-gray-800 text-lg">{item.name}</h4>
+                      <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full">
+                        Melhor: {minPrice > 0 ? `R$ ${minPrice.toFixed(2)}` : '-'}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {prices.map((p, idx) => (
+                        <div key={idx} className="flex justify-between text-sm">
+                          <span className={`${p.price === minPrice && p.price !== null ? 'font-bold text-green-700' : 'text-gray-500'}`}>
+                            {p.supplier}
+                          </span>
+                          <span className={`${p.price === minPrice && p.price !== null ? 'font-bold text-green-700' : 'text-gray-400'}`}>
+                            {p.price ? `R$ ${p.price.toFixed(2)}` : '-'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {consolidatedItems.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+              <div className="text-center py-8 text-gray-400">Nenhum item encontrado.</div>
+            )}
           </div>
         )}
       </div>

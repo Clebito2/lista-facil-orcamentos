@@ -21,6 +21,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
   const [manualItemName, setManualItemName] = useState("");
   const [manualPrice, setManualPrice] = useState("");
   const [manualLink, setManualLink] = useState("");
+  const [manualFormOpen, setManualFormOpen] = useState(false);
 
   const handleManualAdd = async () => {
     if (!manualSupplier || !manualItemName || !manualPrice) {
@@ -189,6 +190,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
             <input
               type="file"
               accept="image/*,application/pdf"
+              capture="environment"
               id="quote-upload"
               className="hidden"
               onChange={handleQuoteUpload}
@@ -213,63 +215,70 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
 
         {/* Manual Link Entry Form */}
         <div className="mt-8 pt-6 border-t border-gray-100">
-          <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-            🔗 Adicionar Item Manual / Link de Internet
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-            <div className="md:col-span-1">
-              <label className="text-xs text-gray-500 block mb-1">Loja / Site</label>
-              <input
-                type="text"
-                placeholder="Ex: Amazon"
-                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                value={manualSupplier}
-                onChange={e => setManualSupplier(e.target.value)}
-              />
+          <button
+            onClick={() => setManualFormOpen(!manualFormOpen)}
+            className="w-full flex justify-between items-center text-sm font-bold text-gray-700 mb-4 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+          >
+            <span className="flex items-center gap-2">🔗 Adicionar Item Manual / Link de Internet</span>
+            <span>{manualFormOpen ? '⬆️' : '⬇️'}</span>
+          </button>
+
+          {manualFormOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end animate-in fade-in slide-in-from-top-2">
+              <div className="md:col-span-1">
+                <label className="text-xs text-gray-500 block mb-1">Loja / Site</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Amazon"
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  value={manualSupplier}
+                  onChange={e => setManualSupplier(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="text-xs text-gray-500 block mb-1">Item da Lista</label>
+                <select
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  value={manualItemName}
+                  onChange={e => setManualItemName(e.target.value)}
+                >
+                  <option value="">Selecione...</option>
+                  {masterItems.map(item => (
+                    <option key={item.name} value={item.name}>{item.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-1">
+                <label className="text-xs text-gray-500 block mb-1">Preço Unit. (R$)</label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  value={manualPrice}
+                  onChange={e => setManualPrice(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label className="text-xs text-gray-500 block mb-1">Link (Opcional)</label>
+                <input
+                  type="text"
+                  placeholder="https://..."
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  value={manualLink}
+                  onChange={e => setManualLink(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <button
+                  onClick={handleManualAdd}
+                  disabled={!manualSupplier || !manualItemName || !manualPrice}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
+                >
+                  + Adicionar
+                </button>
+              </div>
             </div>
-            <div className="md:col-span-1">
-              <label className="text-xs text-gray-500 block mb-1">Item da Lista</label>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                value={manualItemName}
-                onChange={e => setManualItemName(e.target.value)}
-              >
-                <option value="">Selecione...</option>
-                {masterItems.map(item => (
-                  <option key={item.name} value={item.name}>{item.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="md:col-span-1">
-              <label className="text-xs text-gray-500 block mb-1">Preço Unit. (R$)</label>
-              <input
-                type="number"
-                placeholder="0.00"
-                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                value={manualPrice}
-                onChange={e => setManualPrice(e.target.value)}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className="text-xs text-gray-500 block mb-1">Link (Opcional)</label>
-              <input
-                type="text"
-                placeholder="https://..."
-                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                value={manualLink}
-                onChange={e => setManualLink(e.target.value)}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <button
-                onClick={handleManualAdd}
-                disabled={!manualSupplier || !manualItemName || !manualPrice}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-              >
-                + Adicionar
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

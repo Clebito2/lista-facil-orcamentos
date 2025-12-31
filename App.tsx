@@ -12,7 +12,11 @@ import ReportView from './components/ReportView';
 
 const App: React.FC = () => {
   const { currentUser, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'lists' | 'master' | 'quotes' | 'report'>('lists');
+  const [activeTab, setActiveTabState] = useState<'lists' | 'master' | 'quotes' | 'report'>('lists');
+  const setActiveTab = (tab: 'lists' | 'master' | 'quotes' | 'report') => {
+    if (navigator.vibrate) navigator.vibrate(50);
+    setActiveTabState(tab);
+  };
   const [childLists, setChildLists] = useState<ChildList[]>([]);
   const [quotes, setQuotes] = useState<SupplierQuote[]>([]);
   const [loading, setLoading] = useState(true);
