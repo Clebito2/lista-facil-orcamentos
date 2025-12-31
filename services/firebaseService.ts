@@ -66,6 +66,10 @@ export const firebaseService = {
     await updateDoc(doc(db, 'users', userId, 'quotes', id), { supplierName });
   },
 
+  updateQuoteItems: async (userId: string, id: string, items: any[], totalValue: number) => {
+    await updateDoc(doc(db, 'users', userId, 'quotes', id), { items, totalValue });
+  },
+
   // Viral Sharing Features
   shareList: async (listData: { title: string, items: any[] }) => {
     const docRef = await addDoc(collection(db, 'shared_lists'), {

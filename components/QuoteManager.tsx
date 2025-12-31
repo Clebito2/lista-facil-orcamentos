@@ -16,6 +16,89 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
+  // Manual Entry State
+  const [manualSupplier, setManualSupplier] = useState("");
+  const [manualItemName, setManualItemName] = useState("");
+  const [manualPrice, setManualPrice] = useState("");
+  const [manualLink, setManualLink] = useState("");
+
+  const handleManualAdd = async () => {
+    if (!manualSupplier || !manualItemName || !manualPrice) {
+      alert("Preencha fornecedor, item e preço.");
+      return;
+    }
+
+    const price = parseFloat(manualPrice.replace(',', '.'));
+    if (isNaN(price)) {
+      alert("Preço inválido.");
+      return;
+    }
+
+    try {
+      // Check if supplier exists
+      const existingQuote = quotes.find(q => q.supplierName.toLowerCase() === manualSupplier.toLowerCase());
+
+      const newItem = {
+        itemName: manualItemName,
+        unitPrice: price,
+        url: manualLink || undefined
+      };
+
+      if (existingQuote) {
+        // Update existing
+        const newItems = [...existingQuote.items, newItem];
+
+        // Recalculate total
+        let newTotal = 0;
+        newItems.forEach(qi => {
+          const master = masterItems.find(m => m.name.toLowerCase().trim() === qi.itemName.toLowerCase().trim());
+          if (master) {
+            let qty = master.totalQuantity;
+            const isPaper = /sulfite|papel|a4/i.test(master.name);
+            const isHighQty = qty >= 100;
+            const isPackPrice = qi.unitPrice > 1.0;
+            if (isPaper && isHighQty && isPackPrice) qty = Math.ceil(qty / 500);
+
+            newTotal += qi.unitPrice * qty;
+          }
+        });
+
+        await firebaseService.updateQuoteItems(userId, existingQuote.id, newItems, newTotal);
+      } else {
+        // Create new
+        const total = (() => {
+          const master = masterItems.find(m => m.name.toLowerCase().trim() === manualItemName.toLowerCase().trim());
+          if (!master) return 0;
+          let qty = master.totalQuantity;
+          const isPaper = /sulfite|papel|a4/i.test(master.name);
+          const isHighQty = qty >= 100;
+          const isPackPrice = price > 1.0;
+          if (isPaper && isHighQty && isPackPrice) qty = Math.ceil(qty / 500);
+          return price * qty;
+        })();
+
+        await firebaseService.saveQuote(userId, {
+          supplierName: manualSupplier,
+          date: new Date().toISOString(),
+          items: [newItem],
+          totalValue: total
+        });
+      }
+
+      // Reset Form
+      setManualItemName("");
+      setManualPrice("");
+      setManualLink("");
+      // Keep supplier for convenience
+      onUpdate();
+      alert("Item adicionado com sucesso!");
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao adicionar item.");
+    }
+  };
+
   const handleQuoteUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -100,7 +183,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-gray-800">Cotações e Orçamentos</h2>
-            <p className="text-gray-500 text-sm">Envie as fotos ou PDFs dos orçamentos que recebeu das papelarias.</p>
+            <p className="text-gray-500 text-sm">Envie as fotos ou adicione itens manualmente (com links).</p>
           </div>
           <div className="relative">
             <input
@@ -121,10 +204,71 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
                   <span className="text-gray-500">Processando...</span>
                 </>
               ) : (
-                '💰 Adicionar Orçamento'
+                '📷 Upload de Foto/PDF'
               )}
             </label>
             {masterItems.length === 0 && <p className="text-[10px] text-red-400 mt-1">* Adicione pelo menos uma lista primeiro</p>}
+          </div>
+        </div>
+
+        {/* Manual Link Entry Form */}
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+            🔗 Adicionar Item Manual / Link de Internet
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div className="md:col-span-1">
+              <label className="text-xs text-gray-500 block mb-1">Loja / Site</label>
+              <input
+                type="text"
+                placeholder="Ex: Amazon"
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                value={manualSupplier}
+                onChange={e => setManualSupplier(e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-1">
+              <label className="text-xs text-gray-500 block mb-1">Item da Lista</label>
+              <select
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                value={manualItemName}
+                onChange={e => setManualItemName(e.target.value)}
+              >
+                <option value="">Selecione...</option>
+                {masterItems.map(item => (
+                  <option key={item.name} value={item.name}>{item.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-1">
+              <label className="text-xs text-gray-500 block mb-1">Preço Unit. (R$)</label>
+              <input
+                type="number"
+                placeholder="0.00"
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                value={manualPrice}
+                onChange={e => setManualPrice(e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-1">
+              <label className="text-xs text-gray-500 block mb-1">Link (Opcional)</label>
+              <input
+                type="text"
+                placeholder="https://..."
+                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                value={manualLink}
+                onChange={e => setManualLink(e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-1">
+              <button
+                onClick={handleManualAdd}
+                disabled={!manualSupplier || !manualItemName || !manualPrice}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
+              >
+                + Adicionar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -177,7 +321,14 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
                       <p className="text-xs text-gray-500 truncate mb-1" title={item.itemName}>{item.itemName}</p>
                       <div className="flex justify-between items-end">
                         <span className="text-xs text-gray-400 italic">un.</span>
-                        <span className="font-bold text-gray-700">R$ {item.unitPrice.toFixed(2)}</span>
+                        <div className="flex items-center gap-1">
+                          {item.url && (
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700" title="Ver Link">
+                              🔗
+                            </a>
+                          )}
+                          <span className="font-bold text-gray-700">R$ {item.unitPrice.toFixed(2)}</span>
+                        </div>
                       </div>
                       {master && (
                         <div className="mt-1 pt-1 border-t border-gray-200 flex justify-between text-[10px]">

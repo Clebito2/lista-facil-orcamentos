@@ -15,6 +15,7 @@ export interface ConsolidatedItem {
 export interface QuoteItem {
   itemName: string;
   unitPrice: number;
+  url?: string; // Link para compra online
 }
 
 export interface SupplierQuote {
