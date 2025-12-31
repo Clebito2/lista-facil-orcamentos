@@ -54,7 +54,7 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
       });
     } else {
       // FULL MODE (With Recommendations)
-      doc.text(" leve esta lista para as lojas indicadas para garantir o menor preço.", 14, 30);
+      doc.text("Leve esta lista para as lojas indicadas para garantir o menor preço.", 14, 30);
       let yPos = 40;
 
       // Group items by supplier
