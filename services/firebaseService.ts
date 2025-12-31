@@ -6,7 +6,6 @@ import {
   doc,
   query,
   where,
-  where,
   Timestamp,
   updateDoc
 } from 'firebase/firestore';
@@ -65,5 +64,32 @@ export const firebaseService = {
 
   updateQuote: async (userId: string, id: string, supplierName: string) => {
     await updateDoc(doc(db, 'users', userId, 'quotes', id), { supplierName });
+  },
+
+  // Viral Sharing Features
+  shareList: async (listData: { title: string, items: any[] }) => {
+    const docRef = await addDoc(collection(db, 'shared_lists'), {
+      ...listData,
+      createdAt: Timestamp.now(),
+      shared: true
+    });
+    return docRef.id;
+  },
+
+  getSharedList: async (shareId: string) => {
+    const docRef = doc(db, 'shared_lists', shareId);
+    const docSnap = await ((await import('firebase/firestore')).getDoc(docRef));
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as any;
+    } else {
+      return null;
+    }
+  },
+
+  importSharedList: async (userId: string, listData: { title: string, items: any[] }) => {
+    // Add "(Importada)" to title to distinguish
+    const newTitle = `${listData.title} (Importada)`;
+    return await firebaseService.saveChildList(userId, newTitle, listData.items);
   }
 };

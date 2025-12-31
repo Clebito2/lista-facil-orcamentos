@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-const AuthScreen: React.FC = () => {
+interface Props {
+    sharedListTitle?: string | null;
+}
+
+const AuthScreen: React.FC<Props> = ({ sharedListTitle }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -110,9 +114,20 @@ const AuthScreen: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Right Column: Auth Card + Advertise Button */}
+                {/* Auth Card */}
                 <div className="order-1 md:order-2 flex flex-col gap-6">
                     <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+
+                        {sharedListTitle && (
+                            <div className="mb-6 bg-pink-50 border border-pink-200 rounded-xl p-4 text-center animate-pulse">
+                                <span className="text-2xl block mb-2">🎁</span>
+                                <h3 className="font-bold text-pink-700">Você recebeu uma lista!</h3>
+                                <p className="text-sm text-pink-600">
+                                    Faça login ou crie uma conta para salvar a lista <strong>"{sharedListTitle}"</strong>.
+                                </p>
+                            </div>
+                        )}
+
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold text-gray-800 mb-2">
                                 {isLogin ? 'Bem-vindo! 👋' : 'Criar nova conta 🎉'}

@@ -50,6 +50,27 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
     setEditValue(currentTitle);
   };
 
+  const [sharingId, setSharingId] = useState<string | null>(null);
+
+  const handleShare = async (list: ChildList) => {
+    try {
+      setSharingId(list.id);
+      const shareId = await firebaseService.shareList({
+        title: list.title,
+        items: list.items
+      });
+
+      const shareUrl = `${window.location.origin}/?shareId=${shareId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      alert(`Link copiado para a área de transferência!\n\nEnvie este link para outros pais: ${shareUrl}`);
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao gerar link de compartilhamento.");
+    } finally {
+      setSharingId(null);
+    }
+  };
+
   const saveEdit = async () => {
     if (editingId && editValue.trim()) {
       await firebaseService.updateChildList(userId, editingId, editValue.trim());
@@ -123,13 +144,23 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
                 )}
                 <p className="text-sm text-gray-500">{list.items.length} itens identificados</p>
               </div>
-              <button
-                onClick={() => handleDelete(list.id)}
-                className="text-gray-300 hover:text-red-500 transition-colors p-1"
-                title="Excluir lista"
-              >
-                🗑️
-              </button>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => handleShare(list)}
+                  className="text-gray-300 hover:text-blue-500 transition-colors p-1"
+                  title="Compartilhar lista"
+                  disabled={sharingId === list.id}
+                >
+                  {sharingId === list.id ? '⏳' : '🔗'}
+                </button>
+                <button
+                  onClick={() => handleDelete(list.id)}
+                  className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                  title="Excluir lista"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
             <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
               {list.items.map((item, idx) => (

@@ -13,5 +13,12 @@ service cloud.firestore {
       // for igual ao ID da coleção que está tentando acessar (userId)
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Regra para Listas Compartilhadas (Viral Growth)
+    // Caminho: /shared_lists/{docId}
+    match /shared_lists/{document=**} {
+      allow read: if true; // Qualquer pessoa com o link pode ler (para importar)
+      allow create: if request.auth != null; // Só usuários logados podem criar compartilhamentos
+    }
   }
 }

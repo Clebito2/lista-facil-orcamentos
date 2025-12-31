@@ -17,11 +17,65 @@ const App: React.FC = () => {
   const [quotes, setQuotes] = useState<SupplierQuote[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [pendingShareId, setPendingShareId] = useState<string | null>(null);
+  const [sharedListTitle, setSharedListTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check for share URL
+    const params = new URLSearchParams(window.location.search);
+    const shareId = params.get('shareId');
+    if (shareId) {
+      setPendingShareId(shareId);
+      checkSharedList(shareId);
+    }
+  }, []);
+
+  const checkSharedList = async (shareId: string) => {
+    try {
+      const list = await firebaseService.getSharedList(shareId);
+      if (list) {
+        setSharedListTitle(list.title);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar lista compartilhada", error);
+    }
+  };
+
   useEffect(() => {
     if (currentUser) {
       loadData();
+
+      // If we have a pending share and user just logged in (or was logged in)
+      if (pendingShareId && sharedListTitle) {
+        handleImportShare(pendingShareId);
+      }
     }
-  }, [currentUser]);
+  }, [currentUser, pendingShareId, sharedListTitle]);
+
+  const handleImportShare = async (shareId: string) => {
+    if (!currentUser || !sharedListTitle) return;
+
+    if (confirm(`Você recebeu a lista "${sharedListTitle}". Deseja salvá-la em sua conta agora?`)) {
+      try {
+        const list = await firebaseService.getSharedList(shareId);
+        if (list) {
+          await firebaseService.importSharedList(currentUser.uid, list);
+          alert("Lista importada com sucesso!");
+          // Clean URL
+          window.history.pushState({}, '', '/');
+          setPendingShareId(null);
+          setSharedListTitle(null);
+          loadData();
+        }
+      } catch (error) {
+        alert("Erro ao importar lista.");
+      }
+    } else {
+      // User rejected, clear URL
+      window.history.pushState({}, '', '/');
+      setPendingShareId(null);
+    }
+  }
 
   const loadData = async () => {
     if (!currentUser) return;
@@ -109,7 +163,7 @@ const App: React.FC = () => {
 
   // Show auth screen if not logged in
   if (!currentUser) {
-    return <AuthScreen />;
+    return <AuthScreen sharedListTitle={sharedListTitle} />;
   }
 
   if (loading) {

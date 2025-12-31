@@ -1,7 +1,8 @@
-
 import React from 'react';
 import { BudgetAnalysis, ConsolidatedItem, SupplierQuote } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface Props {
   analysis: BudgetAnalysis | null;
@@ -41,6 +42,81 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes }) =>
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const generatePDF = () => {
+    if (!analysis) return;
+
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString('pt-BR');
+
+    // Title
+    doc.setFontSize(22);
+    doc.setTextColor(236, 72, 153); // Pink-500
+    doc.text("Lista Fácil - Checklist de Compras", 14, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Gerado em: ${today}`, 14, 26);
+    doc.text(" leve esta lista para as lojas indicadas para garantir o menor preço.", 14, 30);
+
+    let yPos = 40;
+
+    // Group items by supplier
+    const itemsBySupplier = (analysis.recommendations || []).reduce((acc: Record<string, typeof analysis.recommendations>, rec) => {
+      if (!acc[rec.bestSupplier]) acc[rec.bestSupplier] = [];
+      acc[rec.bestSupplier].push(rec);
+      return acc;
+    }, {});
+
+    Object.entries(itemsBySupplier).forEach(([supplier, items]) => {
+      const storeTotal = items.reduce((sum, item) => {
+        const master = consolidatedItems.find(m => m.name === item.itemName);
+        return sum + (item.price * (master?.totalQuantity || 0));
+      }, 0);
+
+      // Store Header
+      doc.setFontSize(14);
+      doc.setTextColor(0);
+      doc.text(`${supplier}`, 14, yPos);
+
+      doc.setFontSize(12);
+      doc.setTextColor(16, 185, 129); // Emerald-500
+      doc.text(`Total Est.: R$ ${storeTotal.toFixed(2)}`, 150, yPos);
+
+      yPos += 5;
+
+      // Table
+      const tableBody = items.map(item => {
+        const master = consolidatedItems.find(m => m.name === item.itemName);
+        return [
+          item.itemName,
+          `x${master?.totalQuantity || 1}`,
+          `R$ ${item.price.toFixed(2)}`,
+          '[   ]'
+        ];
+      });
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Item', 'Qtd', 'Preço Unit.', 'Check']],
+        body: tableBody,
+        theme: 'striped',
+        headStyles: { fillColor: [236, 72, 153] }, // Pink headers
+        styles: { fontSize: 10 },
+        columnStyles: {
+          0: { cellWidth: 90 }, // Item
+          1: { cellWidth: 20 }, // Qtd
+          2: { cellWidth: 30 }, // Price
+          3: { cellWidth: 20, halign: 'center' } // Checkbox
+        }
+      });
+
+      // @ts-ignore
+      yPos = doc.lastAutoTable.finalY + 15;
+    });
+
+    doc.save(`lista_facil_checklist_${today.replace(/\//g, '-')}.pdf`);
   };
 
   const COLORS = ['#EC4899', '#6366F1', '#10B981', '#F59E0B', '#3B82F6'];
