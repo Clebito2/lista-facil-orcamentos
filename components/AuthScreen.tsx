@@ -114,7 +114,7 @@ const AuthScreen: React.FC = () => {
                 <div className="bg-white rounded-3xl shadow-2xl p-8 order-1 md:order-2 border border-gray-100">
                     <div className="text-center mb-8">
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                            {isLogin ? 'Bem-vindo de volta! 👋' : 'Criar nova conta 🎉'}
+                            {isLogin ? 'Bem-vindo! 👋' : 'Criar nova conta 🎉'}
                         </h2>
                         <p className="text-sm text-gray-500">
                             {isLogin ? 'Entre para acessar suas listas' : 'Comece a economizar agora'}
