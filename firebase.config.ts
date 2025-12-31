@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCigbbY1ItXZo-A8XNzIIhescpm2Zq4VeI",
+  apiKey: "AIzaSyC5r2pqbmO76XhkkY2vGn2DW3DYmvQOrnU",
   authDomain: "lista-facil-orcamentos.firebaseapp.com",
   projectId: "lista-facil-orcamentos",
   storageBucket: "lista-facil-orcamentos.firebasestorage.app",
