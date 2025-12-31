@@ -133,7 +133,7 @@ const App: React.FC = () => {
         <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 pt-24">
+      <main className="max-w-5xl mx-auto px-4 pt-24 relative z-10">
         {activeTab === 'lists' && (
           <ChildListManager
             childLists={childLists}
