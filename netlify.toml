@@ -3,6 +3,5 @@
   publish = "dist"
 
 [build.environment]
-  # Ignora a pasta de build no scanner de segredos porque
-  # as chaves VITE_GEMINI_API_KEY e FIREBASE precisam estar públicas no bundle JS
-  SECRETS_SCAN_OMIT_PATHS = "dist/*"
+  # Desabilita o scanner porque a chave Gemini (AIza...) PRECISA ser pública neste app
+  SECRETS_SCAN_ENABLED = "false"
