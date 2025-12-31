@@ -183,7 +183,7 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen pb-20 bg-cover bg-center relative bg-fixed"
+      className="min-h-screen pb-8 bg-cover bg-center relative bg-fixed"
       style={{ backgroundImage: "url('/desk-bg.png')" }}
     >
       <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] z-0"></div>
@@ -234,21 +234,6 @@ const App: React.FC = () => {
         </footer>
       </main>
 
-      {/* Persistent Bottom Nav for Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 md:hidden">
-        <button onClick={() => setActiveTab('lists')} className={`p-2 ${activeTab === 'lists' ? 'text-pink-500' : 'text-gray-400'}`}>
-          Listas
-        </button>
-        <button onClick={() => setActiveTab('master')} className={`p-2 ${activeTab === 'master' ? 'text-pink-500' : 'text-gray-400'}`}>
-          Resumo
-        </button>
-        <button onClick={() => setActiveTab('quotes')} className={`p-2 ${activeTab === 'quotes' ? 'text-pink-500' : 'text-gray-400'}`}>
-          Orçamentos
-        </button>
-        <button onClick={() => setActiveTab('report')} className={`p-2 ${activeTab === 'report' ? 'text-pink-500' : 'text-gray-400'}`}>
-          Relatório
-        </button>
-      </nav>
     </div>
   );
 };

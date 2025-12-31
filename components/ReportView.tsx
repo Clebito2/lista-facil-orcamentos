@@ -202,7 +202,7 @@ const ReportView: React.FC<Props> = ({ analysis, consolidatedItems, quotes, onRe
   // we might want to filter the bottom table too. Let's start with just the search table as requested.
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8">
 
       {/* Share CTA */}
       <div className="flex justify-between items-center">
