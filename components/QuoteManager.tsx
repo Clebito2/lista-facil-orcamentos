@@ -113,9 +113,17 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
           const mimeType = result.split(';')[0].split(':')[1];
           const base64 = result.split(',')[1];
 
+          // Pre-check API Key
+          const keyStatus = checkGeminiKey();
+          if (!keyStatus.present) {
+            alert("ERRO DE CONFIGURAÇÃO: A chave da API (VITE_GEMINI_API_KEY) não foi encontrada no ambiente. Verifique o Netlify.");
+            setIsUploading(false);
+            return;
+          }
+
           const masterNames = masterItems.map(i => i.name);
           // Pass mimeType to service
-          console.log("Enviando para Gemini:", { mimeType, size: base64.length });
+          console.log("Enviando para Gemini:", { mimeType, size: base64.length, keySource: keyStatus.source });
           const extracted = await analyzeQuoteFromImage(base64, mimeType, masterNames);
           console.log("Resposta do Gemini:", extracted);
 
@@ -148,11 +156,11 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
           const errorMessage = innerError.message || JSON.stringify(innerError) || "Erro desconhecido";
 
           if (errorMessage.includes("API key")) {
-            alert("Erro de Configuração: Chave da API inválida ou não encontrada. Verifique o console.");
+            alert(`Erro de Configuração de API: ${errorMessage}\n\nVerifique se a chave é válida e se o domínio está autorizado.`);
           } else if (errorMessage.includes("429")) {
             alert("Erro de Cota: O limite de uso da IA foi atingido. Tente novamente mais tarde.");
           } else {
-            alert(`Erro ao ler orçamento: ${errorMessage.slice(0, 100)}...`);
+            alert(`Erro ao ler orçamento: ${errorMessage.slice(0, 150)}...`);
           }
         }
       };
