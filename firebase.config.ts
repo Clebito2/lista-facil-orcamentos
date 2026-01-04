@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC5r2pqbmO76XhkkY2vGn2DW3DYmvQOrnU",
-  authDomain: "lista-facil-orcamentos.firebaseapp.com",
-  projectId: "lista-facil-orcamentos",
-  storageBucket: "lista-facil-orcamentos.firebasestorage.app",
-  messagingSenderId: "75065676378",
-  appId: "1:75065676378:web:13effba95afff56acdbe63"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
