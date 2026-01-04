@@ -45,6 +45,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
       await firebaseService.saveChildList(userId, listTitle, items);
 
       setUploadStatus("Concluído!");
+      alert(`Sucesso! Encontramos ${items.length} itens na lista "${listTitle}". Ela aparecerá no topo da sua tela.`);
       onUpdate(true);
     } catch (error: any) {
       console.error(error);

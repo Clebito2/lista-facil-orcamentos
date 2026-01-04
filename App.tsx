@@ -94,6 +94,7 @@ const App: React.FC = () => {
       setQuotes(storedQuotes);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
+      alert("Houve um erro ao sincronizar seus dados com o servidor. Verifique sua conexão.");
     } finally {
       if (!silent) setLoading(false);
     }

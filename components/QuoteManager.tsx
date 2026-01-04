@@ -154,6 +154,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
 
       await firebaseService.saveQuote(userId, { ...extracted, totalValue: total });
       setUploadStatus("Concluído!");
+      alert(`Sucesso! Orçamento de "${extracted.supplierName}" processado com ${extracted.items.length} itens.`);
       onUpdate(true);
     } catch (innerError: any) {
       console.error("Erro no processamento:", innerError);

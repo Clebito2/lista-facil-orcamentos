@@ -7,7 +7,8 @@ import {
   query,
   where,
   Timestamp,
-  updateDoc
+  updateDoc,
+  orderBy
 } from 'firebase/firestore';
 import { db } from '../firebase.config';
 import { ChildList, SupplierQuote } from '../types';
@@ -29,7 +30,11 @@ export const firebaseService = {
   },
 
   getChildLists: async (userId: string): Promise<ChildList[]> => {
-    const querySnapshot = await getDocs(collection(db, 'users', userId, 'childLists'));
+    const q = query(
+      collection(db, 'users', userId, 'childLists'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       title: doc.data().title || doc.data().childName || 'Lista sem nome', // Fallback for old data
@@ -60,7 +65,11 @@ export const firebaseService = {
   },
 
   getQuotes: async (userId: string): Promise<SupplierQuote[]> => {
-    const querySnapshot = await getDocs(collection(db, 'users', userId, 'quotes'));
+    const q = query(
+      collection(db, 'users', userId, 'quotes'),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       supplierName: doc.data().supplierName,
