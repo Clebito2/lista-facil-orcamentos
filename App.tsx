@@ -84,14 +84,19 @@ const App: React.FC = () => {
   const loadData = async (silent = false) => {
     if (!currentUser) return;
 
-    if (!silent) setLoading(true);
-    const [lists, storedQuotes] = await Promise.all([
-      firebaseService.getChildLists(currentUser.uid),
-      firebaseService.getQuotes(currentUser.uid)
-    ]);
-    setChildLists(lists);
-    setQuotes(storedQuotes);
-    if (!silent) setLoading(false);
+    try {
+      if (!silent) setLoading(true);
+      const [lists, storedQuotes] = await Promise.all([
+        firebaseService.getChildLists(currentUser.uid),
+        firebaseService.getQuotes(currentUser.uid)
+      ]);
+      setChildLists(lists);
+      setQuotes(storedQuotes);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      if (!silent) setLoading(false);
+    }
   };
 
   const consolidatedItems = useMemo(() => {
@@ -170,23 +175,21 @@ const App: React.FC = () => {
     return <AuthScreen sharedListTitle={sharedListTitle} />;
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-pink-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
-          <p className="text-pink-600 font-medium">Carregando seus dados...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className="min-h-screen pb-8 bg-cover bg-center relative bg-fixed"
       style={{ backgroundImage: "url('/desk-bg.png')" }}
     >
       <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] z-0"></div>
+
+      {loading && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <div className="text-center bg-white p-8 rounded-3xl shadow-2xl border border-pink-100">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+            <p className="text-pink-600 font-bold">Atualizando...</p>
+          </div>
+        </div>
+      )}
 
       <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} userEmail={currentUser.email || ''} />
 

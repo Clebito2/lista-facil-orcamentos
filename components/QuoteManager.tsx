@@ -7,12 +7,13 @@ import { firebaseService } from '../services/firebaseService';
 interface Props {
   quotes: SupplierQuote[];
   masterItems: ConsolidatedItem[];
-  onUpdate: () => void;
+  onUpdate: (silent?: boolean) => void;
   userId: string;
 }
 
 const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -105,72 +106,71 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
     if (!file) return;
 
     setIsUploading(true);
+    setUploadStatus("Lendo arquivo...");
+
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const result = reader.result as string;
-          const mimeType = result.split(';')[0].split(':')[1];
-          const base64 = result.split(',')[1];
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-          // Pre-check API Key
-          const keyStatus = checkGeminiKey();
-          if (!keyStatus.present) {
-            alert("ERRO DE CONFIGURAÇÃO: A chave da API (VITE_GEMINI_API_KEY) não foi encontrada no ambiente. Verifique o Netlify.");
-            setIsUploading(false);
-            return;
+      const mimeType = base64Data.split(';')[0].split(':')[1];
+      const base64 = base64Data.split(',')[1];
+
+      // Pre-check API Key
+      const keyStatus = checkGeminiKey();
+      if (!keyStatus.present) {
+        throw new Error("ERRO DE CONFIGURAÇÃO: A chave da API (VITE_GEMINI_API_KEY) não foi encontrada no ambiente. Verifique o Netlify.");
+      }
+
+      setUploadStatus("Analisando com IA (pode levar 30s)...");
+      const masterNames = masterItems.map(i => i.name);
+      const extracted = await analyzeQuoteFromImage(base64, mimeType, masterNames);
+
+      if (!extracted || extracted.supplierName === "Desconhecido") {
+        throw new Error("Falha na análise. A IA não conseguiu identificar os dados do orçamento.");
+      }
+
+      setUploadStatus("Calculando totais e salvando...");
+      // Calculate total based on master list quantities
+      let total = 0;
+      extracted.items.forEach(qi => {
+        const master = masterItems.find(m => m.name.toLowerCase().trim() === qi.itemName.toLowerCase().trim());
+        if (master) {
+          let qty = master.totalQuantity;
+          // Fix for Sulfite/Paper unit mismatch (500 sheets vs 1 pack)
+          const isPaper = /sulfite|papel|a4/i.test(master.name);
+          const isHighQty = qty >= 100;
+          const isPackPrice = qi.unitPrice > 1.0;
+
+          if (isPaper && isHighQty && isPackPrice) {
+            qty = Math.ceil(qty / 500);
           }
-
-          const masterNames = masterItems.map(i => i.name);
-          // Pass mimeType to service
-          console.log("Enviando para Gemini:", { mimeType, size: base64.length, keySource: keyStatus.source });
-          const extracted = await analyzeQuoteFromImage(base64, mimeType, masterNames);
-          console.log("Resposta do Gemini:", extracted);
-
-          if (!extracted || extracted.supplierName === "Desconhecido") {
-            throw new Error(`Falha na análise. Retorno: ${JSON.stringify(extracted)}`);
-          }
-
-          // Calculate total based on master list quantities
-          let total = 0;
-          extracted.items.forEach(qi => {
-            const master = masterItems.find(m => m.name.toLowerCase().trim() === qi.itemName.toLowerCase().trim());
-            if (master) {
-              let qty = master.totalQuantity;
-              // Fix for Sulfite/Paper unit mismatch (500 sheets vs 1 pack)
-              const isPaper = /sulfite|papel|a4/i.test(master.name);
-              const isHighQty = qty >= 100;
-              const isPackPrice = qi.unitPrice > 1.0;
-
-              if (isPaper && isHighQty && isPackPrice) {
-                qty = Math.ceil(qty / 500);
-              }
-              total += qi.unitPrice * qty;
-            }
-          });
-
-          await firebaseService.saveQuote(userId, { ...extracted, totalValue: total });
-          onUpdate();
-        } catch (innerError: any) {
-          console.error("Erro interno no processamento:", innerError);
-          const errorMessage = innerError.message || JSON.stringify(innerError) || "Erro desconhecido";
-
-          if (errorMessage.includes("API key")) {
-            alert(`Erro de Configuração de API: ${errorMessage}\n\nVerifique se a chave é válida e se o domínio está autorizado.`);
-          } else if (errorMessage.includes("429")) {
-            alert("Erro de Cota: O limite de uso da IA foi atingido. Tente novamente mais tarde.");
-          } else {
-            alert(`Erro ao ler orçamento: ${errorMessage.slice(0, 150)}...`);
-          }
+          total += qi.unitPrice * qty;
         }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao iniciar upload.");
+      });
+
+      await firebaseService.saveQuote(userId, { ...extracted, totalValue: total });
+      setUploadStatus("Concluído!");
+      onUpdate(true);
+    } catch (innerError: any) {
+      console.error("Erro no processamento:", innerError);
+      const errorMessage = innerError.message || "Erro desconhecido";
+
+      if (errorMessage.includes("API key")) {
+        alert(`Erro de Configuração de API: ${errorMessage}\n\nVerifique se a chave é válida e se o domínio está autorizado.`);
+      } else if (errorMessage.includes("429")) {
+        alert("Erro de Cota: O limite de uso da IA foi atingido. Tente novamente mais tarde.");
+      } else {
+        alert(`Erro ao ler orçamento: ${errorMessage}`);
+      }
     } finally {
-      // Delay estendido para melhor UX (dá tempo do usuário ver que processou)
-      setTimeout(() => setIsUploading(false), 5000);
+      setIsUploading(false);
+      setUploadStatus("");
+      // Clear the input value
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -218,7 +218,7 @@ const QuoteManager: React.FC<Props> = ({ quotes, masterItems, onUpdate, userId }
               {isUploading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  <span className="text-gray-500">Processando ({isUploading ? 'Aguarde...' : ''})</span>
+                  <span className="text-gray-500">{uploadStatus || 'Processando...'}</span>
                 </>
               ) : (
                 '📷 Upload de Foto/PDF'

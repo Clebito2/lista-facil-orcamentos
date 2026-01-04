@@ -6,12 +6,13 @@ import { firebaseService } from '../services/firebaseService';
 
 interface Props {
   childLists: ChildList[];
-  onUpdate: () => void;
+  onUpdate: (silent?: boolean) => void;
   userId: string;
 }
 
 const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -20,24 +21,39 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
     if (!file) return;
 
     setIsUploading(true);
+    setUploadStatus("Lendo arquivo...");
+
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const result = reader.result as string;
-        const mimeType = result.split(';')[0].split(':')[1];
-        const base64 = result.split(',')[1];
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-        const { listTitle, items } = await extractItemsFromImage(base64, mimeType);
+      const mimeType = base64Data.split(';')[0].split(':')[1];
+      const base64 = base64Data.split(',')[1];
 
-        await firebaseService.saveChildList(userId, listTitle, items);
-        onUpdate();
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
+      setUploadStatus("Analisando com IA (pode levar 30s)...");
+      const { listTitle, items } = await extractItemsFromImage(base64, mimeType);
+
+      if (!items || items.length === 0) {
+        throw new Error("A IA não conseguiu identificar itens na imagem. Verifique a qualidade da foto.");
+      }
+
+      setUploadStatus("Salvando lista...");
+      await firebaseService.saveChildList(userId, listTitle, items);
+
+      setUploadStatus("Concluído!");
+      onUpdate(true);
+    } catch (error: any) {
       console.error(error);
-      alert(`Erro ao processar imagem: ${(error as any).message || "Verifique a conexão e tente novamente."}`);
+      alert(`Erro ao processar imagem: ${error.message || "Verifique a conexão e tente novamente."}`);
     } finally {
-      setTimeout(() => setIsUploading(false), 3000);
+      setIsUploading(false);
+      setUploadStatus("");
+      // Clear the input value so the same file can be uploaded again if needed
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -110,7 +126,7 @@ const ChildListManager: React.FC<Props> = ({ childLists, onUpdate, userId }) => 
             {isUploading ? (
               <div className="flex flex-col items-center">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
-                <span className="text-blue-600 font-bold">Lendo a lista... Aguarde um momento.</span>
+                <span className="text-blue-600 font-bold">{uploadStatus || 'Lendo a lista... Aguarde um momento.'}</span>
               </div>
             ) : (
               <>

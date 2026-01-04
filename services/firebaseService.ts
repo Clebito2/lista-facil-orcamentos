@@ -14,12 +14,18 @@ import { ChildList, SupplierQuote } from '../types';
 
 export const firebaseService = {
   saveChildList: async (userId: string, title: string, items: any[]) => {
-    const docRef = await addDoc(collection(db, 'users', userId, 'childLists'), {
-      title,
-      items,
-      createdAt: Timestamp.now()
-    });
-    return { id: docRef.id, title, items };
+    try {
+      const docRef = await addDoc(collection(db, 'users', userId, 'childLists'), {
+        title,
+        items,
+        createdAt: Timestamp.now()
+      });
+      console.log(`Lista salva com sucesso: ${docRef.id}`);
+      return { id: docRef.id, title, items };
+    } catch (error) {
+      console.error("Erro ao salvar lista no Firebase:", error);
+      throw error;
+    }
   },
 
   getChildLists: async (userId: string): Promise<ChildList[]> => {
@@ -40,11 +46,17 @@ export const firebaseService = {
   },
 
   saveQuote: async (userId: string, quote: Omit<SupplierQuote, 'id'>) => {
-    const docRef = await addDoc(collection(db, 'users', userId, 'quotes'), {
-      ...quote,
-      createdAt: Timestamp.now()
-    });
-    return { ...quote, id: docRef.id };
+    try {
+      const docRef = await addDoc(collection(db, 'users', userId, 'quotes'), {
+        ...quote,
+        createdAt: Timestamp.now()
+      });
+      console.log(`Orçamento salvo com sucesso: ${docRef.id}`);
+      return { ...quote, id: docRef.id };
+    } catch (error) {
+      console.error("Erro ao salvar orçamento no Firebase:", error);
+      throw error;
+    }
   },
 
   getQuotes: async (userId: string): Promise<SupplierQuote[]> => {
