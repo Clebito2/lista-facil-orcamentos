@@ -3,10 +3,10 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SchoolItem, SupplierQuote } from "../types";
 
 // Fallback to process.env for broader compatibility (Vite define)
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.error("ERRO CRÍTICO: Chave da API Gemini não encontrada. Verifique VITE_GEMINI_API_KEY ou GEMINI_API_KEY no .env ou configurações do Netlify.");
+  console.error("ERRO CRÍTICO: Chave da API Gemini não encontrada. Verifique VITE_GEMINI_API_KEY no .env ou configurações do Netlify.");
 }
 
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
@@ -15,7 +15,7 @@ export const checkGeminiKey = () => {
   return {
     present: !!apiKey,
     preview: apiKey ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : 'N/A',
-    source: import.meta.env.VITE_GEMINI_API_KEY ? 'VITE_ENV' : (process.env.GEMINI_API_KEY ? 'PROCESS_ENV' : 'NONE')
+    source: apiKey ? 'VITE_ENV' : 'NONE'
   };
 };
 
