@@ -25,7 +25,7 @@ export interface ExtractedListResponse {
 }
 
 export const extractItemsFromImage = async (base64Image: string, mimeType: string): Promise<ExtractedListResponse> => {
-  const model = "gemini-2.5-pro";
+  const model = "gemini-3.0-flash";
 
   const response = await ai.models.generateContent({
     model,
