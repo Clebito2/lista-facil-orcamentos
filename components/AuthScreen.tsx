@@ -112,6 +112,25 @@ const AuthScreen: React.FC<Props> = ({ sharedListTitle }) => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Informação Legal / Procon Link */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-6 rounded-2xl shadow-sm space-y-4">
+                        <div className="flex items-center gap-3 text-blue-700">
+                            <span className="text-2xl">⚖️</span>
+                            <h3 className="font-bold">Seus direitos garantidos</h3>
+                        </div>
+                        <p className="text-sm text-blue-800 leading-relaxed">
+                            As escolas <strong>não podem exigir</strong> que o material seja adquirido em uma papelaria específica ou na própria instituição.
+                        </p>
+                        <a
+                            href="https://g1.globo.com/go/goias/videos-bom-dia-go/video/escola-nao-pode-exigir-onde-pais-devem-comprar-material-escolar-diz-especialista-14245694.ghtml"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-xs font-bold bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                        >
+                            <span>📺</span> Assistir reportagem (G1/Procon)
+                        </a>
+                    </div>
                 </div>
 
                 {/* Auth Card */}
