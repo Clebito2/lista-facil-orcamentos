@@ -225,7 +225,18 @@ const App: React.FC = () => {
           />
         )}
 
-        <footer className="mt-20 mb-10 text-center text-gray-400 text-sm relative z-10">
+        <footer className="mt-20 mb-10 text-center text-gray-400 text-sm relative z-10 px-4">
+          <div className="mb-4">
+            <a
+              href="https://api.whatsapp.com/send/?phone=5561996993134&text=Ol%C3%A1%2C+encontrei+um+erro+no+app+e+gostaria+de+reportar&type=phone_number&app_absent=0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm border border-gray-100 px-4 py-2 rounded-full hover:bg-white hover:text-pink-500 transition-all shadow-sm group"
+            >
+              <span className="group-hover:animate-bounce">🛠️</span>
+              encontrou algum erro no app? <span className="font-bold underline decoration-dotted">Fale com o desenvolvedor</span>
+            </a>
+          </div>
           <p>© {new Date().getFullYear()} Lista Fácil. Todos os direitos reservados.</p>
           <a
             href="https://api.whatsapp.com/send/?phone=5561996993134&text&type=phone_number&app_absent=0"
